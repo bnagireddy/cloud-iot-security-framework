@@ -1,0 +1,137 @@
+version: "3.8"
+
+services:
+  # MQTT Broker
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: iot-mqtt-broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-logs:/mosquitto/log
+    restart: unless-stopped
+    networks:
+      - iot-network
+
+  # CoAP Server (for IoT devices)
+  coap-server:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+      target: application
+    container_name: iot-coap-server
+    ports:
+      - "5683:5683/udp"
+    environment:
+      - COAP_PORT=5683
+    depends_on:
+      - mosquitto
+    networks:
+      - iot-network
+    restart: unless-stopped
+
+  # IoT Security Framework
+  iot-security-framework:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+      target: application
+    container_name: iot-security-framework
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../config:/app/config
+      - ../data:/app/data
+      - ../models:/app/models
+      - ../results:/app/results
+      - ../logs:/app/logs
+    environment:
+      - MQTT_BROKER=mosquitto
+      - MQTT_PORT=1883
+      - LOG_LEVEL=INFO
+    depends_on:
+      - mosquitto
+      - elasticsearch
+      - prometheus
+    networks:
+      - iot-network
+    restart: unless-stopped
+    command: python scripts/run_experiments.py
+
+  # Elasticsearch (for logging and SIEM)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: iot-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - iot-network
+    restart: unless-stopped
+
+  # Kibana (visualization)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: iot-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - iot-network
+    restart: unless-stopped
+
+  # Prometheus (metrics)
+  prometheus:
+    image: prom/prometheus:v2.46.0
+    container_name: iot-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    networks:
+      - iot-network
+    restart: unless-stopped
+
+  # Grafana (dashboards)
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: iot-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - iot-network
+    restart: unless-stopped
+
+networks:
+  iot-network:
+    driver: bridge
+
+volumes:
+  mosquitto-data:
+  mosquitto-logs:
+  elasticsearch-data:
+  prometheus-data:
+  grafana-data:

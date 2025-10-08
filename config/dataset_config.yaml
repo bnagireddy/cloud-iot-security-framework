@@ -1,0 +1,110 @@
+# Dataset Generation Configuration
+# For creating synthetic IoT security datasets
+
+# Dataset Configuration
+dataset:
+  name: "iot_security_dataset"
+  version: "1.0"
+  output_dir: "./data"
+
+  # Total samples
+  total_samples: 100000
+
+  # Class distribution
+  class_distribution:
+    normal: 0.70 # 70% normal traffic
+    botnet_ddos: 0.05
+    data_exfiltration: 0.05
+    scanning: 0.05
+    credential_stuffing: 0.03
+    command_injection: 0.03
+    ransomware: 0.03
+    firmware_manipulation: 0.02
+    sensor_spoofing: 0.02
+    lateral_movement: 0.02
+
+# Device Type Distribution
+device_distribution:
+  smart_camera: 0.25
+  smart_plug: 0.25
+  thermostat: 0.25
+  industrial_sensor: 0.25
+
+# Data Augmentation
+augmentation:
+  # SMOTE for minority classes
+  enable_smote: true
+  smote_k_neighbors: 5
+
+  # Noise injection
+  enable_noise: true
+  noise_level: 0.05
+
+  # Time-based augmentation
+  enable_temporal: true
+  time_shift_range: 300 # seconds
+
+# Feature Generation
+features:
+  # Network features
+  network:
+    bandwidth_range: [0.5, 30.0] # Mbps
+    packet_size_range: [64, 4096] # bytes
+    latency_range: [1, 500] # ms
+
+  # Device features
+  device:
+    cpu_range: [0, 100] # percent
+    memory_range: [0, 512] # MB
+    temperature_range: [20, 90] # Celsius
+
+  # Security features
+  security:
+    auth_failure_range: [0, 50]
+    port_scan_range: [0, 100]
+
+# Data Quality
+quality:
+  # Missing values
+  missing_value_ratio: 0.02
+
+  # Outliers
+  outlier_ratio: 0.01
+
+  # Label noise
+  label_noise_ratio: 0.005
+
+# Data Splits
+splits:
+  train: 0.6
+  validation: 0.2
+  test: 0.2
+
+  # Stratified split to preserve class distribution
+  stratified: true
+
+# Privacy-Preserving
+privacy:
+  # Differential privacy
+  enable_dp: true
+  epsilon: 1.0
+  delta: 0.00001
+
+  # Anonymization
+  anonymize_device_ids: true
+  anonymize_ip_addresses: true
+
+# Export Formats
+export:
+  formats:
+    - csv
+    - parquet
+    - hdf5
+
+  # Feature scaling
+  scale_features: true
+  scaler: "standard" # standard, minmax, robust
+
+  # Save metadata
+  save_metadata: true
+  metadata_format: "json"

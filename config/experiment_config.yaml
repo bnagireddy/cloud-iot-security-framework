@@ -1,0 +1,155 @@
+# Experiment Configuration
+# Matches paper specifications for reproducibility
+
+# Random seed for reproducibility
+random_seed: 42
+
+# Device Configuration
+devices:
+  smart_cameras: 10
+  smart_plugs: 10
+  thermostats: 10
+  industrial_sensors: 10
+  total_devices: 40
+
+# Network Configuration
+network:
+  mqtt_broker: "localhost"
+  mqtt_port: 1883
+  coap_port: 5683
+
+# Security Configuration
+security:
+  enable_micro_segmentation: true
+  enable_zero_trust: true
+  jwt_token_lifetime_minutes: 5
+  min_trust_score: 70.0
+
+  # Micro-segmentation zones (10 zones as per paper)
+  zones:
+    - external
+    - dmz
+    - cloud_gateway
+    - iot_trusted
+    - iot_untrusted
+    - iot_quarantine
+    - management
+    - data_processing
+    - ai_analytics
+    - admin
+
+# AI Detection Configuration
+ai_detection:
+  # Anomaly Detection (Isolation Forest)
+  isolation_forest:
+    n_estimators: 100
+    contamination: 0.1
+    random_state: 42
+
+  # Threat Classification (Random Forest)
+  random_forest:
+    n_estimators: 200
+    max_depth: 20
+    random_state: 42
+
+  # Feature extraction
+  n_features: 47
+
+  # Detection thresholds
+  anomaly_threshold: 0.5
+  confidence_threshold: 0.7
+
+# Attack Simulation Configuration
+attack_simulation:
+  # Attack probability (10% of traffic as per paper)
+  attack_probability: 0.10
+
+  # Attack type distribution
+  attack_types:
+    botnet_ddos: 0.15
+    data_exfiltration: 0.15
+    scanning: 0.15
+    credential_stuffing: 0.10
+    command_injection: 0.10
+    ransomware: 0.10
+    firmware_manipulation: 0.10
+    sensor_spoofing: 0.10
+    lateral_movement: 0.05
+
+  # Adversarial attack parameters
+  adversarial:
+    enable: true
+    evasion_techniques:
+      - "slow_rate"
+      - "traffic_padding"
+      - "timing_manipulation"
+    mimicry_probability: 0.3
+
+# Experiment Configuration
+experiment:
+  # Duration
+  duration_minutes: 60
+
+  # Data collection
+  telemetry_interval_seconds: 5
+
+  # Number of trials for statistical significance
+  n_trials: 30
+
+  # Train/validation/test split
+  train_ratio: 0.6
+  validation_ratio: 0.2
+  test_ratio: 0.2
+
+  # Concept drift simulation
+  drift_enabled: true
+  drift_check_interval_minutes: 10
+
+# Performance Metrics
+metrics:
+  # Target metrics (from paper)
+  target_detection_rate: 96.4
+  target_false_positive_rate: 4.2
+  target_lateral_movement_reduction: 85.3
+
+  # Confidence interval
+  confidence_level: 0.95
+
+  # Statistical testing
+  statistical_test: "paired_t_test"
+  bonferroni_correction: true
+  alpha: 0.0167 # 0.05/3 comparisons
+
+# Baseline Configurations
+baselines:
+  # Baseline 1: Rule-based IDS (Snort-like)
+  rule_based:
+    enabled: true
+    detection_rules: 50
+
+  # Baseline 2: Traditional ML (SVM)
+  traditional_ml:
+    enabled: true
+    model: "svm"
+    kernel: "rbf"
+
+  # Baseline 3: Deep Learning (LSTM)
+  deep_learning:
+    enabled: true
+    model: "lstm"
+    layers: 2
+    units: 64
+
+# Output Configuration
+output:
+  results_dir: "./results"
+  models_dir: "./models"
+  logs_dir: "./logs"
+  figures_dir: "./figures"
+
+  # Save intermediate results
+  save_checkpoints: true
+  checkpoint_interval_minutes: 15
+
+  # Logging level
+  log_level: "INFO"
